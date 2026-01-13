@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>現在地テスト</title>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- UserMarker -->
+<script src="https://tnk-12.github.io/test_v1/leaflet.usermarker.js"></script>
+<link rel="stylesheet" href="https://tnk-12.github.io/test_v1/leaflet.usermarker.css">
+
+
+
+
+<style>
+  #map { height: 90vh; width: 100%; }
+  #debug { padding: 10px; font-size: 14px; }
+</style>
+
+<style>
+#saveBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;   /* ← これがないと地図の下に潜る */
+  padding: 12px 18px;
+  font-size: 16px;
+}
+
+#clearBtn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1000;   /* ← これがないと地図の下に潜る */
+  padding: 12px 18px;
+  font-size: 16px;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<div id="map"></div>
+<div id="debug"></div>
+
+<div id="controls">
+  <button id="saveBtn">軌跡を保存</button>
+  <button id="clearBtn">軌跡をリセット</button>
+</div>
+
+
+<script>
+
+const map = L.map('map').setView([35.0, 135.0], 15);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors'
+}).addTo(map);
+
+let userMarker = null;
+
+
+//let map = L.map('map');
+let marker = null;
+let path = [];
+let polyline = L.polyline([], {
+  color: 'red',
+  weight: 4
+}).addTo(map);
+
+navigator.geolocation.watchPosition(
+  (pos) => {
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+    const current = [lat, lng];
+
+    const accuracy = pos.coords.accuracy; //水平精度
+
+    // 初回
+    if (!marker) {
+      map.setView(current, 17);
+      marker = L.marker(current).addTo(map);
+
+      path.push(current);
+      polyline.setLatLngs(path);
+      return; // ← 初回はここで終了してOK
+    }
+
+    // 2回目以降
+    const last = path[path.length - 1];
+    const dist = map.distance(last, current);
+    
+    console.log(accuracy);    //console に水平精度の表示
+
+    //⚪︎mごとに
+   
+    if (dist >= 5) {
+      path.push(current);
+      polyline.setLatLngs(path); 
+      //console.log(current);    console に座標の表示
+    }
+
+    marker.setLatLng(current);
+    map.panTo(current);
+  },
+  (err) => {
+    alert("位置情報エラー: " + err.message);
+  },
+  {
+    enableHighAccuracy: true,
+    maximumAge: 0,
+    timeout: 10000
+  }
+);
+
+document.getElementById("saveBtn").addEventListener("click", savePath);
+
+
+function savePath() {
+  if (path.length === 0) {
+    alert("保存する軌跡がありません");
+    return;
+  }
+
+  const record = {
+    date: new Date().toLocaleString(),
+    path: path
+  };
+
+  localStorage.setItem("running_path", JSON.stringify(record));
+  alert("軌跡を保存しました！");
+}
+
+
+//clear Btn 
+document.getElementById("clearBtn").addEventListener("click", printPath);
+
+
+function printPath() {
+  let polyline = L.polyline([], {
+  color: 'blue',
+  weight: 4
+  }).addTo(map);
+
+  polyline.setLatLngs(path);
+
+  alert("軌跡を表示しました。");
+}
+
+
+</script>
