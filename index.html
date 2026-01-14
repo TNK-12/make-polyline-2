@@ -160,6 +160,8 @@ function printPath() {
     date: new Date().toLocaleString(),
     record: record
   };
+  localStorage.setItem("running_accurate", JSON.stringify(record));
+  alert("水平精度を保存しました！");
 }
 
 
