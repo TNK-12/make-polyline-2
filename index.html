@@ -69,7 +69,7 @@ let userMarker = null;
 //let map = L.map('map');
 let marker = null;
 let path = [];
-let record = [];
+let record_acc = [];
 let polyline = L.polyline([], {
   color: 'red',
   weight: 4
@@ -105,7 +105,7 @@ navigator.geolocation.watchPosition(
       polyline.setLatLngs(path); 
       //console.log(current);    // console に座標の表示
       //console.log(accuracy);  //  console に水平精度の表示
-      record.push(accuracy);   //水平精度の保存
+      record_acc.push(accuracy);   //水平精度の保存
     //}
 
     marker.setLatLng(current);
@@ -156,11 +156,11 @@ function printPath() {
   alert("軌跡を表示しました。");
   */
 
-  const record = {
+  const record_2 = {
     date: new Date().toLocaleString(),
-    record: record
+    record_acc: record_acc
   };
-  localStorage.setItem("running_accurate", JSON.stringify(record));
+  localStorage.setItem("running_accurate", JSON.stringify(record_2));
   alert("水平精度を保存しました！");
 }
 
