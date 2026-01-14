@@ -96,14 +96,14 @@ navigator.geolocation.watchPosition(
     const last = path[path.length - 1];
     const dist = map.distance(last, current);
     
-    console.log(accuracy);    //console に水平精度の表示
+    //console.log(accuracy);    console に水平精度の表示
 
     //⚪︎mごとに
    
     if (dist >= 5) {
       path.push(current);
       polyline.setLatLngs(path); 
-      //console.log(current);    console に座標の表示ンンn
+      //console.log(current);    console に座標の表示
     }
 
     marker.setLatLng(current);
